@@ -29,7 +29,7 @@ func offsetFromYear(year int) int {
     return daycount
 }
 
-var daysPerMonth = []int{
+var offsetsPerMonth = []int{
     0,
     31,  // February
     58,  // March
@@ -47,7 +47,7 @@ var daysPerMonth = []int{
 func offsetFromDate(day int, month int, year int) int {
     daycount := offsetFromYear(year)
     if month > January {
-        daycount += daysPerMonth[month-1]
+        daycount += offsetsPerMonth[month-1]
         if month > February && isLeapYear(year) {
             daycount += 1
         }
@@ -65,7 +65,7 @@ func yearFromOffset(daycount int) int {
 
 func monthFromOffset(daycount int) int {
     daycount -= offsetFromYear(yearFromOffset(daycount))
-    for month, mo := range daysPerMonth {
+    for month, mo := range offsetsPerMonth {
         if mo > daycount {
             return month
         }
@@ -77,16 +77,16 @@ func dayFromOffset(daycount int) int {
     year := yearFromOffset(daycount)
     is_leap := isLeapYear(year)
     daycount -= offsetFromYear(year)
-    for month, mo := range daysPerMonth {
+    for month, mo := range offsetsPerMonth {
         if mo > daycount {
-            daycount -= daysPerMonth[month-1]
+            daycount -= offsetsPerMonth[month-1]
             if month > January && is_leap {
                 daycount -= 1
             }
             return daycount + 1
         }
     }
-    daycount -= daysPerMonth[len(daysPerMonth)-1]
+    daycount -= offsetsPerMonth[len(offsetsPerMonth)-1]
     if is_leap {
         daycount -= 1
     }
@@ -106,14 +106,64 @@ func weekdayFromOffset(daycount int) int {
     return weekday
 }
 
+var daysPerMonth = []int{
+    31,
+    28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+}
+
 func advance(daycount int, n int, period int) int {
+    var day, month, year, maxday int
     switch period {
-    case Year:
-    case Month:
-    case Week:
-        daycount += n*7
     case Day:
         daycount += n
+    case Week:
+        daycount += n*7
+    case Month:
+        day = dayFromOffset(daycount)
+        month = monthFromOffset(daycount)
+        year = yearFromOffset(daycount)
+        switch {
+        case month > 12:
+            year += month/12
+            month = month%12
+            if month == 0 {
+                month = 12
+            }
+        case month < 1:
+            yrs := (month-12)/12
+            year += yrs
+            month -= yrs*12
+        }
+        maxday = offsetsPerMonth[month-1]
+        if month > 1 && isLeapYear(year) {
+            maxday += 1
+        }
+        if day > maxday {
+            day = maxday
+        }
+        daycount = offsetFromDate(day, month, year)
+    case Year:
+        day = dayFromOffset(daycount)
+        month = monthFromOffset(daycount)
+        year = yearFromOffset(daycount) + n
+        maxday = offsetsPerMonth[month-1]
+        if month > 1 && isLeapYear(year) {
+            maxday += 1
+        }
+        if day > maxday {
+            day = maxday
+        }
+        daycount = offsetFromDate(day, month, year)
     }
-    return daycoun
+    return daycount
 }

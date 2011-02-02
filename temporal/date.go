@@ -27,7 +27,7 @@ const (
 )
 
 const (
-    Day
+    Day = iota
     Week
     Month
     Year
@@ -66,3 +66,8 @@ func (d *Date) Week() int {
 func (d *Date) IsLeapYear() bool {
     return isLeapYear(d.dayCount)
 }
+
+func (d *Date) Advance(n int, period int) {
+    d.dayCount = advance(d.dayCount, n, period)
+}
+
