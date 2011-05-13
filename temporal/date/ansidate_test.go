@@ -1,6 +1,8 @@
 package date
 
-import "testing"
+import (
+    "testing"
+)
 
 type leapYearTest struct {
     in  int
@@ -6251,10 +6253,10 @@ var dateOffsetTests = []dateOffsetTest{
 
 func TestDateOffset(t *testing.T) {
     for _, dt := range dateOffsetTests {
-        v := offsetFromDate(dt.day, dt.month, dt.year)
+        v := offsetFromDate(dt.year, dt.month, dt.day)
         if v != dt.offset {
-            t.Errorf("offsetFromDate(%d, %d, %d) = %d, want %d", dt.day,
-                dt.month, dt.year, v, dt.offset)
+            t.Errorf("offsetFromDate(%d, %d, %d) = %d, want %d", dt.year,
+                dt.month, dt.day, v, dt.offset)
         }
     }
 }
@@ -6264,7 +6266,7 @@ func TestYearFromDaycount(t *testing.T) {
         v := yearFromOffset(dt.offset)
         if v != dt.year {
             t.Errorf("yearFromOffset(offsetFromDate(%d, %d, %d)) = %d, want %d",
-                dt.day, dt.month, dt.year, v, dt.year)
+                dt.year, dt.month, dt.day, v, dt.year)
             break
         }
     }
@@ -6275,7 +6277,7 @@ func TestMonthFromDaycount(t *testing.T) {
         v := monthFromOffset(dt.offset)
         if v != dt.month {
             t.Errorf("monthFromOffset(offsetFromDate(%d, %d, %d)) = %d, want %d",
-                dt.day, dt.month, dt.year, v, dt.year)
+                dt.year, dt.month, dt.day, v, dt.year)
             break
         }
     }
@@ -6286,7 +6288,7 @@ func TestDayFromDaycount(t *testing.T) {
         v := dayFromOffset(dt.offset)
         if v != dt.day {
             t.Errorf("dayFromOffset(offsetFromDate(%d, %d, %d)) = %d, want %d",
-                dt.day, dt.month, dt.year, v, dt.day)
+                dt.year, dt.month, dt.day, v, dt.day)
             break
         }
     }
@@ -12301,10 +12303,18 @@ var testWeekdayTests = []testWeekdayTest{
 
 func TestWeekdayFromOffset(t *testing.T) {
     for _, dt := range testWeekdayTests {
-        v := weekdayFromOffset(offsetFromDate(dt.day, dt.month, dt.year))
+        v := weekdayFromOffset(offsetFromDate(dt.year, dt.month, dt.day))
         if v != dt.weekday {
-            t.Errorf("testWeekdayTest(%d, %d, %d) = %d, want %d", dt.day,
-                dt.month, dt.year, v, dt.weekday)
+            t.Errorf("testWeekdayTest(%d, %d, %d) = %d, want %d", dt.year,
+                dt.month, dt.day, v, dt.weekday)
         }
+    }
+}
+
+func TestDayDiffers(t *testing.T) {
+    delta := 732401
+    v := offsetFromDate(2006, 4, 1) - offsetFromDate(1,1,1)
+    if v != delta {
+        t.Errorf("TestDayDelta = %d, want %d", v, delta)
     }
 }

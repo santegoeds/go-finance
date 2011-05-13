@@ -1,7 +1,7 @@
 package date
 
 const (
-    baseYear = 1601
+    epoch = 1601
 )
 
 func isLeapYear(year int) bool {
@@ -17,16 +17,15 @@ func isLeapYear(year int) bool {
     return false
 }
 
-func offsetFromYear(year int) int {
-    daycount := 0
-    year -= baseYear
+func offsetFromYear(year int) (daycount int) {
+    year -= epoch
     if year < 0 {
         year += 1
         daycount = year*365 + year/4 + year/400 - year/100 - 366
     } else {
         daycount = year*365 + year/4 + year/400 - year/100
     }
-    return daycount
+    return
 }
 
 var offsetsPerMonth = []int{
@@ -44,7 +43,7 @@ var offsetsPerMonth = []int{
     334, // December
 }
 
-func offsetFromDate(day int, month int, year int) int {
+func offsetFromDate(year, month, day int) int {
     daycount := offsetFromYear(year)
     if month > January {
         daycount += offsetsPerMonth[month-1]
@@ -56,7 +55,7 @@ func offsetFromDate(day int, month int, year int) int {
 }
 
 func yearFromOffset(daycount int) int {
-    year := daycount/365 + baseYear
+    year := daycount/365 + epoch
     for daycount < offsetFromYear(year) {
         year -= 1
     }
@@ -74,23 +73,31 @@ func monthFromOffset(daycount int) int {
 }
 
 func dayFromOffset(daycount int) int {
-    year := yearFromOffset(daycount)
+    _, _, day := dateFromOffset(daycount)
+    return day
+}
+
+func dateFromOffset(daycount int) (year, month, day int) {
+    day = daycount
+    year = yearFromOffset(daycount)
     is_leap := isLeapYear(year)
-    daycount -= offsetFromYear(year)
+    day -= offsetFromYear(year)
     for month, mo := range offsetsPerMonth {
-        if mo > daycount {
-            daycount -= offsetsPerMonth[month-1]
+        if mo > day {
+            day -= offsetsPerMonth[month-1]
             if month > January && is_leap {
-                daycount -= 1
+                day -= 1
             }
-            return daycount + 1
+            day += 1
+            return
         }
     }
-    daycount -= offsetsPerMonth[len(offsetsPerMonth)-1]
+    day -= offsetsPerMonth[len(offsetsPerMonth)-1]
     if is_leap {
-        daycount -= 1
+        day -= 1
     }
-    return daycount + 1
+    day += 1
+    return
 }
 
 func weekFromOffset(daycount int) int {
@@ -127,22 +134,22 @@ func advance(daycount int, n int, period int) int {
     case Day:
         daycount += n
     case Week:
-        daycount += n*7
+        daycount += n * 7
     case Month:
         day = dayFromOffset(daycount)
         month = monthFromOffset(daycount)
         year = yearFromOffset(daycount)
         switch {
         case month > 12:
-            year += month/12
-            month = month%12
+            year += month / 12
+            month = month % 12
             if month == 0 {
                 month = 12
             }
         case month < 1:
-            yrs := (month-12)/12
+            yrs := (month - 12) / 12
             year += yrs
-            month -= yrs*12
+            month -= yrs * 12
         }
         maxday = offsetsPerMonth[month-1]
         if month > 1 && isLeapYear(year) {
@@ -151,7 +158,7 @@ func advance(daycount int, n int, period int) int {
         if day > maxday {
             day = maxday
         }
-        daycount = offsetFromDate(day, month, year)
+        daycount = offsetFromDate(year, month, day)
     case Year:
         day = dayFromOffset(daycount)
         month = monthFromOffset(daycount)
@@ -163,7 +170,8 @@ func advance(daycount int, n int, period int) int {
         if day > maxday {
             day = maxday
         }
-        daycount = offsetFromDate(day, month, year)
+        daycount = offsetFromDate(year, month, day)
     }
     return daycount
 }
+
