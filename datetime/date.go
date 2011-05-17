@@ -1,4 +1,4 @@
-package date
+package datetime
 
 import (
     "time"
@@ -70,7 +70,21 @@ func Today() *Date {
     return NewDate(int(t.Year), t.Month, t.Day)
 }
 
-func NewDate(year, month, day int) *Date {
+func NewDate(args ...int) *Date {
+    year, month, day := 1970, 1, 1
+    for i, v := range args {
+        switch i {
+            case 0:
+                year = v
+                break
+            case 1:
+                month = v
+                break
+            case 2:
+                day = v
+                break
+        }
+    }
     return &Date{offsetFromDate(year, month, day)}
 }
 

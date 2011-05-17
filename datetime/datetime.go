@@ -2,11 +2,10 @@ package datetime
 
 import (
     "time"
-    "../date/_obj/date"
 )
 
 type DateTime struct {
-    *date.Date
+    *Date
     time int
 }
 
@@ -43,7 +42,6 @@ func NewDateTime(args ...int) *DateTime {
         }
     }
     second += minute * 60 + hour * 3600
-    d := date.NewDate(year, month, day)
-    return &DateTime{d, second}
+    return &DateTime{NewDate(year, month, day), second}
 }
 

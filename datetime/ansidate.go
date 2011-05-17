@@ -1,4 +1,4 @@
-package date
+package datetime
 
 const (
     epoch = 1601

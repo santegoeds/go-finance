@@ -2,9 +2,10 @@ include $(GOROOT)/src/Make.inc
 
 GOFMT = $(GOROOT)/bin/gofmt -tabwidth=4 -spaces=true -tabindent=false -w
 
-TARG = date
+TARG = datetime
 GOFILES = ansidate.go \
-          date.go
+          date.go \
+          datetime.go
 
 GOTESTFILES = ansidate_test.go
 
